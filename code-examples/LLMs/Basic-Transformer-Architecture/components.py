@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+import math
 
 
 class Attention(nn.Module):
@@ -154,7 +155,7 @@ class PositionalEncoding(nn.Module):
         
         # Compute the arguments for the sine and cosine functions
         # Shape: (context_size, d_model / 2)
-        arg = pos / (10000 ** (2 * dim / d_model))
+        arg = pos / (10000 ** (dim / d_model))
         
         # Compute sine values for even indices
         self.encoding[:, 0::2] = torch.sin(arg)
@@ -162,12 +163,14 @@ class PositionalEncoding(nn.Module):
         # Compute cosine values for odd indices
         self.encoding[:, 1::2] = torch.cos(arg)
 
+        self.register_buffer('encoding', self.encoding)
+
     def forward(self, x):
         # x shape: (batch_size, seq_len, d_model)
         seq_len = x.size(1)
         
         # Return the positional encoding for the given sequence length
-        return self.encoding[:seq_len, :]
+        return self.encoding[:, :seq_len, :]
     
 
 class EfficientPositionalEncoding(nn.Module):
@@ -198,12 +201,11 @@ class EfficientPositionalEncoding(nn.Module):
         self.register_buffer('pe', pe)
 
     def forward(self, x):
-        # x shape: (seq_len, batch_size, d_model)
+        # x shape: (batch_size, seq_len, d_model)
+        seq_len = x.size(1)
         
-        # Add the positional encoding to the input
-        # The [:x.size(0)] slice ensures we only use the relevant part of the encoding
-        x = x + self.pe[:x.size(0)]
-        return x
+        # Return the positional encoding for the given sequence length
+        return self.encoding[:, :seq_len, :]
     
 
 class PositionwiseFeedForward(nn.Module):

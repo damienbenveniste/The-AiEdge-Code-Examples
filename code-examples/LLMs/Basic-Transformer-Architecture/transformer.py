@@ -66,7 +66,8 @@ class Encoder(nn.Module):
         # x shape: (batch_size, seq_len)
         
         # Apply embedding and add positional encoding
-        x = self.embedding(x) + self.pos_embedding(x)
+        x = self.embedding(x)
+        x += self.pos_embedding(x)
         # x shape after embedding: (batch_size, seq_len, d_model)
         
         # Pass through each encoder block
@@ -141,7 +142,8 @@ class Decoder(nn.Module):
         # enc_output shape: (enc_seq_len, batch_size, d_model)
         
         # Apply embedding and add positional encoding
-        x = self.embedding(x) + self.pos_embedding(x)
+        x = self.embedding(x)
+        x += self.pos_embedding(x)
         # x shape after embedding: (batch_size, seq_len, d_model)
         
         # Pass through each decoder block
