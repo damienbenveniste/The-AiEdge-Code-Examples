@@ -143,7 +143,7 @@ class PositionalEncoding(nn.Module):
         super().__init__()
         
         # Create a matrix of shape (context_size, d_model) to store the positional encodings
-        self.encoding = torch.zeros(context_size, d_model)
+        encoding = torch.zeros(context_size, d_model)
         
         # Create a tensor of positions from 0 to context_size - 1
         # Shape: (context_size, 1)
@@ -158,12 +158,12 @@ class PositionalEncoding(nn.Module):
         arg = pos / (10000 ** (dim / d_model))
         
         # Compute sine values for even indices
-        self.encoding[:, 0::2] = torch.sin(arg)
+        encoding[:, 0::2] = torch.sin(arg)
         
         # Compute cosine values for odd indices
-        self.encoding[:, 1::2] = torch.cos(arg)
+        encoding[:, 1::2] = torch.cos(arg)
 
-        self.register_buffer('encoding', self.encoding)
+        self.register_buffer('encoding', encoding)
 
     def forward(self, x):
         # x shape: (batch_size, seq_len, d_model)
@@ -205,7 +205,7 @@ class EfficientPositionalEncoding(nn.Module):
         seq_len = x.size(1)
         
         # Return the positional encoding for the given sequence length
-        return self.encoding[:, :seq_len, :]
+        return self.pe[:, :seq_len, :]
     
 
 class PositionwiseFeedForward(nn.Module):
