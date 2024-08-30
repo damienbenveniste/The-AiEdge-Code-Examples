@@ -1,0 +1,8 @@
+accelerate
+datasets[audio]
+evaluate==0.4.2
+numpy
+tqdm
+boto3
+sagemaker
+scikit-learn
