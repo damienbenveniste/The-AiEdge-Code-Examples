@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+langserve[server]
+langchain
+langchain-huggingface
+langchain-community
+langchain-openai
+openai
+pinecone-client[grpc]
+google
+pypd
+pypdf
+google-api-python-client
