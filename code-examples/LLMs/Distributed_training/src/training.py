@@ -131,8 +131,9 @@ class Trainer:
 
             # Gather predictions and labels from all distributed processes
             # This is crucial for correct evaluation in multi-GPU setups
-            all_predictions.append(self.accelerator.gather(predictions))
-            all_labels.append(self.accelerator.gather(batch["labels"]))
+            preds, refs = self.accelerator.gather_for_metrics((predictions, batch["labels"]))
+            all_predictions.append(preds)
+            all_labels.append(refs)
 
         # Concatenate all predictions and labels
         all_predictions = torch.cat(all_predictions)
@@ -188,17 +189,18 @@ class Trainer:
         Args:
             model: The trained model (potentially wrapped by Accelerator)
         """
-        # Unwrap the model from distributed training wrappers
-        # This is necessary to get the original model for saving
-        unwrapped_model = self.accelerator.unwrap_model(model)
-        
-        # Set the repository name for the Hub
-        repo_name = "my-distributed-model"
-        
-        # Authenticate with Hugging Face Hub
-        login(token=HUGGINGFACE_TOKEN)
-        
-        # Upload model and tokenizer to the Hub
-        # This makes the model publicly available for download and use
-        unwrapped_model.push_to_hub(repo_name)
-        self.tokenizer.push_to_hub(repo_name)
+        if self.accelerator.is_main_process:
+            # Unwrap the model from distributed training wrappers
+            # This is necessary to get the original model for saving
+            unwrapped_model = self.accelerator.unwrap_model(model)
+            
+            # Set the repository name for the Hub
+            repo_name = "my-distributed-model"
+            
+            # Authenticate with Hugging Face Hub
+            login(token=HUGGINGFACE_TOKEN)
+            
+            # Upload model and tokenizer to the Hub
+            # This makes the model publicly available for download and use
+            unwrapped_model.push_to_hub(repo_name)
+            self.tokenizer.push_to_hub(repo_name)
